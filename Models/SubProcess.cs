@@ -9,13 +9,12 @@ namespace CompanyProcessManagement
     public class SubProcess
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Nome { get; set; }
         public int ProcessId { get; set; }
-        public Process Process { get; set; }
-        public List<SubProcess> SubprocessosFilhos { get; set; } = new List<SubProcess>();
-
-        public List<string> FerramentasUtilizadas { get; set; } = new List<string>();
-        public List<Responsavel> Responsaveis { get; set; } = new List<Responsavel>();
-        public List<string> DocumentacaoAssociada { get; set; } = new List<string>();
+        public Process Processo { get; set; }
+        public List<SubProcess> SubprocessosFilhos { get; set; }
+        public List<Ferramenta> Ferramentas { get; set; }
+        public List<Responsavel> Responsaveis { get; set; }
+        public List<Documento> Documentos { get; set; }
     }
 }

@@ -15,5 +15,7 @@ namespace CompanyProcessManagement.Data
         public DbSet<Process> Processos { get; set; }
         public DbSet<SubProcess> Subprocessos { get; set; }
         public DbSet<Responsavel> Responsaveis { get; set; }
+        public DbSet<Ferramenta> Ferramentas { get; set; }
+        public DbSet<Documento> Documentos { get; set; }
     }
 }

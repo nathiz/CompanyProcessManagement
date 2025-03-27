@@ -32,12 +32,10 @@ namespace CompanyProcessManagement.Controllers
         {
             var subProcess = await _context.Subprocessos.Include(sp => 
                 sp.SubprocessosFilhos).FirstOrDefaultAsync(sp => sp.Id == id);
-
             if (subProcess == null)
             {
                 return NotFound();
             }
-
             return subProcess;
         }
 
@@ -58,9 +56,7 @@ namespace CompanyProcessManagement.Controllers
             {
                 return BadRequest();
             }
-
             _context.Entry(subProcess).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -76,7 +72,6 @@ namespace CompanyProcessManagement.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
 
@@ -89,10 +84,8 @@ namespace CompanyProcessManagement.Controllers
             {
                 return NotFound();
             }
-
             _context.Subprocessos.Remove(subProcess);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 

@@ -32,12 +32,10 @@ namespace CompanyProcessManagement.Controllers
         public async Task<ActionResult<Process>> GetProcess(int id)
         {
             var process = await _context.Processos.Include(p => p.Subprocessos).FirstOrDefaultAsync(p => p.Id == id);
-
             if (process == null)
             {
                 return NotFound();
             }
-
             return process;
         }
 
@@ -59,7 +57,6 @@ namespace CompanyProcessManagement.Controllers
                 return BadRequest();
             }
             _context.Entry(process).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -75,7 +72,6 @@ namespace CompanyProcessManagement.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
 
@@ -88,10 +84,8 @@ namespace CompanyProcessManagement.Controllers
             {
                 return NotFound();
             }
-
             _context.Processos.Remove(process);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 

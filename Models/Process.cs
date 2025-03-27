@@ -12,11 +12,10 @@ namespace CompanyProcessManagement.Models
         public string Descricao { get; set; }
         public int AreaId { get; set; }
         public Area Area { get; set; }
-        public List<SubProcess> Subprocessos { get; set; } = new List<SubProcess>();
-    
-        public List<string> FerramentasUtilizadas { get; set; } = new List<string>();
-        public List<Responsavel> Responsaveis { get; set; } = new List<Responsavel>();
-        public List<string> DocumentacaoAssociada { get; set; } = new List<string>();
+        public List<SubProcess> Subprocessos { get; set; }
+        public List<Ferramenta> Ferramentas { get; set; }
+        public List<Responsavel> Responsaveis { get; set; }
+        public List<Documento> Documentos { get; set; }
 
     }
 }
