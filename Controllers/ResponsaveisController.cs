@@ -1,50 +1,50 @@
-using CompanyProcessManagement.Data;
 using CompanyProcessManagement.Models;
+using CompanyProcessManagement.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CompanyProcessManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ResponsaveisController : ControllerBase
+    public class ResponsavelController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ResponsavelService _service; // A dependência do serviço de Responsável
 
-        public ResponsaveisController(ApplicationDbContext context)
+        public ResponsavelController(ResponsavelService service)
         {
-            _context = context;
+            _service = service; // Injeção de dependência do service
         }
 
-        // GET: api/Responsaveis
+        // GET: api/Responsavel
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Responsavel>>> GetResponsaveis()
         {
-            return await _context.Responsaveis.ToListAsync();
+            return Ok(await _service.GetResponsaveisAsync()); // Retorna a lista de responsáveis
         }
 
-        // GET: api/Responsaveis/5
+        // GET: api/Responsavel/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Responsavel>> GetResponsavel(int id)
         {
-            var responsavel = await _context.Responsaveis.FindAsync(id);
+            var responsavel = await _service.GetResponsavelByIdAsync(id); // Busca um responsável pelo id
             if (responsavel == null)
             {
                 return NotFound();
             }
-            return responsavel;
+            return Ok(responsavel); // Retorna o responsável encontrado
         }
 
-        // POST: api/Responsaveis
+        // POST: api/Responsavel
         [HttpPost]
         public async Task<ActionResult<Responsavel>> PostResponsavel(Responsavel responsavel)
         {
-            _context.Responsaveis.Add(responsavel);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction("GetResponsavel", new { id = responsavel.Id }, responsavel);
+            var createdResponsavel = await _service.CreateResponsavelAsync(responsavel); // Cria um novo responsável
+            return CreatedAtAction(nameof(GetResponsavel), new { id = createdResponsavel.Id }, createdResponsavel);
         }
 
-        // PUT: api/Responsaveis/5
+        // PUT: api/Responsavel/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutResponsavel(int id, Responsavel responsavel)
         {
@@ -52,43 +52,20 @@ namespace CompanyProcessManagement.Controllers
             {
                 return BadRequest();
             }
-            _context.Entry(responsavel).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ResponsavelExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _service.UpdateResponsavelAsync(responsavel); // Atualiza o responsável
             return NoContent();
         }
 
-        // DELETE: api/Responsaveis/5
+        // DELETE: api/Responsavel/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteResponsavel(int id)
         {
-            var responsavel = await _context.Responsaveis.FindAsync(id);
-            if (responsavel == null)
+            var deleted = await _service.DeleteResponsavelAsync(id); // Deleta o responsável
+            if (!deleted)
             {
                 return NotFound();
             }
-            _context.Responsaveis.Remove(responsavel);
-            await _context.SaveChangesAsync();
             return NoContent();
-        }
-
-        private bool ResponsavelExists(int id)
-        {
-            return _context.Responsaveis.Any(e => e.Id == id);
         }
     }
 }

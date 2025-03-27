@@ -1,50 +1,51 @@
-using CompanyProcessManagement.Data;
 using CompanyProcessManagement.Models;
+using CompanyProcessManagement.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CompanyProcessManagement.Controllers
 {
+    // Define a rota base para o controller de DetalhamentoProcessos
     [Route("api/[controller]")]
     [ApiController]
-    public class DetalhamentoProcessosController : ControllerBase
+    public class DetalhamentosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DetalhamentosService _service;
 
-        public DetalhamentoProcessosController(ApplicationDbContext context)
+        // Construtor que injeta o service de DetalhamentosProcessos
+        public DetalhamentoProcessosController(DetalhamentoProcessosService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET: api/DetalhamentoProcessos
+        // Método para obter todos os DetalhamentosProcessos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DetalhamentoProcesso>>> GetDetalhamentoProcessos()
         {
-            return await _context.DetalhamentoProcessos.ToListAsync();
+            var detalhamentoProcessos = await _service.GetDetalhamentoProcessosAsync();
+            return Ok(detalhamentoProcessos);
         }
 
-        // GET: api/DetalhamentoProcessos/5
+        // Método para obter um DetalhamentosProcesso específico por ID
         [HttpGet("{id}")]
         public async Task<ActionResult<DetalhamentoProcesso>> GetDetalhamentoProcesso(int id)
         {
-            var detalhamentoProcesso = await _context.DetalhamentoProcessos.FindAsync(id);
+            var detalhamentoProcesso = await _service.GetDetalhamentoProcessoByIdAsync(id);
             if (detalhamentoProcesso == null)
             {
                 return NotFound();
             }
-            return detalhamentoProcesso;
+            return Ok(detalhamentoProcesso);
         }
 
-        // POST: api/DetalhamentoProcessos
+        // Método para criar um novo DetalhamentoProcesso
         [HttpPost]
         public async Task<ActionResult<DetalhamentoProcesso>> PostDetalhamentoProcesso(DetalhamentoProcesso detalhamentoProcesso)
         {
-            _context.DetalhamentoProcessos.Add(detalhamentoProcesso);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction("GetDetalhamentoProcesso", new { id = detalhamentoProcesso.Id }, detalhamentoProcesso);
+            var createdProcesso = await _service.AddDetalhamentoProcessoAsync(detalhamentoProcesso);
+            return CreatedAtAction(nameof(GetDetalhamentoProcesso), new { id = createdProcesso.Id }, createdProcesso);
         }
 
-        // PUT: api/DetalhamentoProcessos/5
+        // Método para atualizar um DetalhamentoProcesso
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDetalhamentoProcesso(int id, DetalhamentoProcesso detalhamentoProcesso)
         {
@@ -52,22 +53,20 @@ namespace CompanyProcessManagement.Controllers
             {
                 return BadRequest();
             }
-            _context.Entry(detalhamentoProcesso).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+
+            await _service.UpdateDetalhamentoProcessoAsync(detalhamentoProcesso); // Atualiza o DetalhamentoProcesso
             return NoContent();
         }
 
-        // DELETE: api/DetalhamentoProcessos/5
+        // Método para excluir um DetalhamentoProcesso
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDetalhamentoProcesso(int id)
         {
-            var detalhamentoProcesso = await _context.DetalhamentoProcessos.FindAsync(id);
-            if (detalhamentoProcesso == null)
+            var deleted = await _service.DeleteDetalhamentoProcessoAsync(id);
+            if (!deleted)
             {
                 return NotFound();
             }
-            _context.DetalhamentoProcessos.Remove(detalhamentoProcesso);
-            await _context.SaveChangesAsync();
             return NoContent();
         }
     }

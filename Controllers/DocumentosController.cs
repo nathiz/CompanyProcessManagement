@@ -1,50 +1,51 @@
-using CompanyProcessManagement.Data;
 using CompanyProcessManagement.Models;
+using CompanyProcessManagement.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CompanyProcessManagement.Controllers
 {
+    // Define a rota base para o controlador de Documentos
     [Route("api/[controller]")]
     [ApiController]
     public class DocumentosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DocumentosService _service;
 
-        public DocumentosController(ApplicationDbContext context)
+        // Construtor que injeta o service de Documentos
+        public DocumentosController(DocumentosService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET: api/Documentos
+        // Método para obter todos os Documentos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Documento>>> GetDocumentos()
         {
-            return await _context.Documentos.ToListAsync();
+            var documentos = await _service.GetDocumentosAsync();
+            return Ok(documentos);
         }
 
-        // GET: api/Documentos/5
+        // Método para obter um Documento específico por ID
         [HttpGet("{id}")]
         public async Task<ActionResult<Documento>> GetDocumento(int id)
         {
-            var documento = await _context.Documentos.FindAsync(id);
+            var documento = await _service.GetDocumentoByIdAsync(id);
             if (documento == null)
             {
                 return NotFound();
             }
-            return documento;
+            return Ok(documento);
         }
 
-        // POST: api/Documentos
+        // Método para criar um novo Documento
         [HttpPost]
         public async Task<ActionResult<Documento>> PostDocumento(Documento documento)
         {
-            _context.Documentos.Add(documento);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction("GetDocumento", new { id = documento.Id }, documento);
+            var createdDocumento = await _service.AddDocumentoAsync(documento);
+            return CreatedAtAction(nameof(GetDocumento), new { id = createdDocumento.Id }, createdDocumento);
         }
 
-        // PUT: api/Documentos/5
+        // Método para atualizar um Documento
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDocumento(int id, Documento documento)
         {
@@ -52,42 +53,21 @@ namespace CompanyProcessManagement.Controllers
             {
                 return BadRequest();
             }
-            _context.Entry(documento).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DocumentoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            await _service.UpdateDocumentoAsync(documento); // Atualiza o Documento
             return NoContent();
         }
 
-        // DELETE: api/Documentos/5
+        // Método para excluir um Documento
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocumento(int id)
         {
-            var documento = await _context.Documentos.FindAsync(id);
-            if (documento == null)
+            var deleted = await _service.DeleteDocumentoAsync(id);
+            if (!deleted)
             {
                 return NotFound();
             }
-            _context.Documentos.Remove(documento);
-            await _context.SaveChangesAsync();
             return NoContent();
-        }
-
-        private bool DocumentoExists(int id)
-        {
-            return _context.Documentos.Any(e => e.Id == id);
         }
     }
 }

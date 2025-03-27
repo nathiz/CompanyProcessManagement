@@ -1,97 +1,71 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CompanyProcessManagement.Data;
 using CompanyProcessManagement.Models;
+using CompanyProcessManagement.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CompanyProcessManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProcessController : ControllerBase
+    public class ProcessoController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ProcessoService _service; // A dependência do service de Processo
 
-        public ProcessController(ApplicationDbContext context)
+        public ProcessoController(ProcessoService service)
         {
-            _context = context;
+            _service = service; // Injeção de dependência do service
         }
 
-         // GET: api/Process
+        // GET: api/Processo
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Process>>> GetProcesses()
+        public async Task<ActionResult<IEnumerable<Processo>>> GetProcessos()
         {
-            return await _context.Processos.Include(p => p.Subprocessos).ToListAsync();
+            return Ok(await _service.GetProcessosAsync()); // Retorna a lista de processos
         }
 
-        // GET: api/Process/{id}
+        // GET: api/Processo/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Process>> GetProcess(int id)
+        public async Task<ActionResult<Processo>> GetProcesso(int id)
         {
-            var process = await _context.Processos.Include(p => p.Subprocessos).FirstOrDefaultAsync(p => p.Id == id);
-            if (process == null)
+            var processo = await _service.GetProcessoByIdAsync(id); // Busca um processo pelo id
+            if (processo == null)
             {
                 return NotFound();
             }
-            return process;
+            return Ok(processo); // Retorna o processo encontrado
         }
 
-        // POST: api/Process
+        // POST: api/Processo
         [HttpPost]
-        public async Task<ActionResult<Process>> CreateProcess(Process process)
+        public async Task<ActionResult<Processo>> PostProcesso(Processo processo)
         {
-            _context.Processos.Add(process);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetProcess), new { id = process.Id }, process);
+            var createdProcesso = await _service.CreateProcessoAsync(processo); // Cria um novo processo
+            return CreatedAtAction(nameof(GetProcesso), new { id = createdProcesso.Id }, createdProcesso);
         }
 
-        // PUT: api/Process/{id}
+        // PUT: api/Processo/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProcess(int id, Process process)
+        public async Task<IActionResult> PutProcesso(int id, Processo processo)
         {
-            if (id != process.Id)
+            if (id != processo.Id)
             {
                 return BadRequest();
             }
-            _context.Entry(process).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProcessExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _service.UpdateProcessoAsync(processo); // Atualiza o processo
             return NoContent();
         }
 
-        // DELETE: api/Process/{id}
+        // DELETE: api/Processo/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProcess(int id)
+        public async Task<IActionResult> DeleteProcesso(int id)
         {
-            var process = await _context.Processos.FindAsync(id);
-            if (process == null)
+            var deleted = await _service.DeleteProcessoAsync(id); // Deleta o processo
+            if (!deleted)
             {
                 return NotFound();
             }
-            _context.Processos.Remove(process);
-            await _context.SaveChangesAsync();
             return NoContent();
-        }
-
-        private bool ProcessExists(int id)
-        {
-            return _context.Processos.Any(e => e.Id == id);
         }
     }
 }

@@ -1,50 +1,54 @@
-using CompanyProcessManagement.Data;
 using CompanyProcessManagement.Models;
+using CompanyProcessManagement.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CompanyProcessManagement.Controllers
 {
+    // Define a rota base para o controlador de Ferramentas
     [Route("api/[controller]")]
     [ApiController]
     public class FerramentasController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly FerramentasService _service;
 
-        public FerramentasController(ApplicationDbContext context)
+        // Construtor que injeta o service de Ferramentas
+        public FerramentasController(FerramentasService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET: api/Ferramentas
+        // Método para obter todas as Ferramentas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Ferramenta>>> GetFerramentas()
         {
-            return await _context.Ferramentas.ToListAsync();
+            var ferramentas = await _service.GetFerramentasAsync();
+            return Ok(ferramentas);
         }
 
-        // GET: api/Ferramentas/5
+        // Método para obter uma Ferramenta específica por ID
         [HttpGet("{id}")]
         public async Task<ActionResult<Ferramenta>> GetFerramenta(int id)
         {
-            var ferramenta = await _context.Ferramentas.FindAsync(id);
+            var ferramenta = await _service.GetFerramentaByIdAsync(id);
             if (ferramenta == null)
             {
-                return NotFound();
+                return NotFound(); 
             }
-            return ferramenta;
+            return Ok(ferramenta);
         }
 
-        // POST: api/Ferramentas
+        // Método para criar uma nova Ferramenta
         [HttpPost]
         public async Task<ActionResult<Ferramenta>> PostFerramenta(Ferramenta ferramenta)
         {
-            _context.Ferramentas.Add(ferramenta);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction("GetFerramenta", new { id = ferramenta.Id }, ferramenta);
+            var createdFerramenta = await _service.AddFerramentaAsync(ferramenta);
+            return CreatedAtAction(nameof(GetFerramenta), new { id = createdFerramenta.Id }, createdFerramenta); 
         }
 
-        // PUT: api/Ferramentas/5
+        // Método para atualizar uma Ferramenta
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put
+                // Método para atualizar uma Ferramenta
         [HttpPut("{id}")]
         public async Task<IActionResult> PutFerramenta(int id, Ferramenta ferramenta)
         {
@@ -52,42 +56,21 @@ namespace CompanyProcessManagement.Controllers
             {
                 return BadRequest();
             }
-            _context.Entry(ferramenta).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FerramentaExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            await _service.UpdateFerramentaAsync(ferramenta); // Atualiza a Ferramenta
             return NoContent();
         }
 
-        // DELETE: api/Ferramentas/5
+        // Método para excluir uma Ferramenta
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFerramenta(int id)
         {
-            var ferramenta = await _context.Ferramentas.FindAsync(id);
-            if (ferramenta == null)
+            var deleted = await _service.DeleteFerramentaAsync(id);
+            if (!deleted)
             {
                 return NotFound();
             }
-            _context.Ferramentas.Remove(ferramenta);
-            await _context.SaveChangesAsync();
             return NoContent();
-        }
-
-        private bool FerramentaExists(int id)
-        {
-            return _context.Ferramentas.Any(e => e.Id == id);
         }
     }
 }

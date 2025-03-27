@@ -1,97 +1,70 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CompanyProcessManagement.Data;
+using CompanyProcessManagement.Models;
+using CompanyProcessManagement.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CompanyProcessManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SubProcessController : ControllerBase
+    public class SubprocessoController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly SubprocessoService _service; // A dependência do service de Subprocesso
 
-        public SubProcessController(ApplicationDbContext context)
+        public SubprocessoController(SubprocessoService service)
         {
-            _context = context;
+            _service = service; // Injeção de dependência do service
         }
 
-        // GET: api/SubProcess
+        // GET: api/Subprocesso
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SubProcess>>> GetSubProcesses()
+        public async Task<ActionResult<IEnumerable<Subprocesso>>> GetSubprocessos()
         {
-            return await _context.Subprocessos.Include(sp => sp.SubprocessosFilhos).ToListAsync();
+            return Ok(await _service.GetSubprocessosAsync()); // Retorna a lista de subprocessos
         }
 
-        // GET: api/SubProcess/{id}
+        // GET: api/Subprocesso/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<SubProcess>> GetSubProcess(int id)
+        public async Task<ActionResult<Subprocesso>> GetSubprocesso(int id)
         {
-            var subProcess = await _context.Subprocessos.Include(sp => 
-                sp.SubprocessosFilhos).FirstOrDefaultAsync(sp => sp.Id == id);
-            if (subProcess == null)
+            var subprocesso = await _service.GetSubprocessoByIdAsync(id); // Busca um subprocesso pelo id
+            if (subprocesso == null)
             {
                 return NotFound();
             }
-            return subProcess;
+            return Ok(subprocesso); // Retorna o subprocesso encontrado
         }
 
-        // POST: api/SubProcess
+        // POST: api/Subprocesso
         [HttpPost]
-        public async Task<ActionResult<SubProcess>> CreateSubProcess(SubProcess subProcess)
+        public async Task<ActionResult<Subprocesso>> PostSubprocesso(Subprocesso subprocesso)
         {
-            _context.Subprocessos.Add(subProcess);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetSubProcess), new { id = subProcess.Id }, subProcess);
+            var createdSubprocesso = await _service.CreateSubprocessoAsync(subprocesso); // Cria um novo subprocesso
+            return CreatedAtAction(nameof(GetSubprocesso), new { id = createdSubprocesso.Id }, createdSubprocesso);
         }
 
-        // PUT: api/SubProcess/{id}
+        // PUT: api/Subprocesso/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSubProcess(int id, SubProcess subProcess)
+        public async Task<IActionResult> PutSubprocesso(int id, Subprocesso subprocesso)
         {
-            if (id != subProcess.Id)
+            if (id != subprocesso.Id)
             {
                 return BadRequest();
             }
-            _context.Entry(subProcess).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SubProcessExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _service.UpdateSubprocessoAsync(subprocesso); // Atualiza o subprocesso
             return NoContent();
         }
 
-        // DELETE: api/SubProcess/{id}
+        // DELETE: api/Subprocesso/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSubProcess(int id)
+        public async Task<IActionResult> DeleteSubprocesso(int id)
         {
-            var subProcess = await _context.Subprocessos.FindAsync(id);
-            if (subProcess == null)
+            var deleted = await _service.DeleteSubprocessoAsync(id); // Deleta o subprocesso
+            if (!deleted)
             {
                 return NotFound();
-            }
-            _context.Subprocessos.Remove(subProcess);
-            await _context.SaveChangesAsync();
             return NoContent();
-        }
-
-        private bool SubProcessExists(int id)
-        {
-            return _context.Subprocessos.Any(e => e.Id == id);
         }
     }
 }
