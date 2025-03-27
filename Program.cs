@@ -16,7 +16,7 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Realiza o seeding de dados ao iniciar a aplicação
+// Realiza o envio de dados ao iniciar a aplicação
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
