@@ -53,7 +53,8 @@ app.UseCors(builder =>
 
 // Configuração do roteamento de endpoints da API
 app.MapControllers();
-
+app.UseRouting();
+app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

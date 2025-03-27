@@ -20,27 +20,84 @@ namespace CompanyProcessManagement.Controllers
             _context = context;
         }
 
-        // GET: api/Process
+         // GET: api/Process
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Process>>> GetProcesses()
         {
-            // Carregar Processos, incluindo SubProcessos se houver, ou apenas retornar os Processos simples
-            var processes = await _context.Processes
-                .Include(p => p.SubProcessos)  // Caso você tenha a relação de SubProcessos em Process
-                .ToListAsync();
+            return await _context.Processos.Include(p => p.Subprocessos).ToListAsync();
+        }
 
-            return Ok(processes);
+        // GET: api/Process/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Process>> GetProcess(int id)
+        {
+            var process = await _context.Processos.Include(p => p.Subprocessos).FirstOrDefaultAsync(p => p.Id == id);
+
+            if (process == null)
+            {
+                return NotFound();
+            }
+
+            return process;
         }
 
         // POST: api/Process
         [HttpPost]
-        public async Task<ActionResult<Process>> PostProcess(Process process)
+        public async Task<ActionResult<Process>> CreateProcess(Process process)
         {
-            _context.Processes.Add(process);
+            _context.Processos.Add(process);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetProcess), new { id = process.Id }, process);
+        }
+
+        // PUT: api/Process/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProcess(int id, Process process)
+        {
+            if (id != process.Id)
+            {
+                return BadRequest();
+            }
+            _context.Entry(process).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProcessExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/Process/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProcess(int id)
+        {
+            var process = await _context.Processos.FindAsync(id);
+            if (process == null)
+            {
+                return NotFound();
+            }
+
+            _context.Processos.Remove(process);
             await _context.SaveChangesAsync();
 
-            // Usando o método CreatedAtAction para retornar o objeto criado
-            return CreatedAtAction(nameof(GetProcesses), new { id = process.id }, process);
+            return NoContent();
+        }
+
+        private bool ProcessExists(int id)
+        {
+            return _context.Processos.Any(e => e.Id == id);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace CompanyProcessManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Area>>> GetAreas()
         {
-            return await _context.Areas.Include(a => a.Processos).ThenInclude(p => p.SubProcessos).ToListAsync();
+            return await _context.Areas.Include(a => a.Processos).ThenInclude(p => p.Subprocessos).ToListAsync();
         }
 
         // POST: api/Areas
@@ -33,7 +33,7 @@ namespace CompanyProcessManagement.Controllers
         {
             _context.Areas.Add(area);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetAreas), new { id = area.id }, area);
+            return CreatedAtAction(nameof(GetAreas), new { id = area.Id }, area);
         }
     }
 }

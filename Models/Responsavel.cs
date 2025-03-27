@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace CompanyProcessManagement.Models
 {
-    public class Area
+    public class Responsavel
     {
         public int Id { get; set; }
         public string Nome { get; set; }
-        public List<Process> Processos { get; set; } = new List<Process>();
-
+        public string Cargo { get; set; }
+        public string Contato { get; set; }
     }
 }

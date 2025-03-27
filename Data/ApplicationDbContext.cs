@@ -12,7 +12,8 @@ namespace CompanyProcessManagement.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {}
 
         public DbSet<Area> Areas { get; set; }
-        public DbSet<Process> Processes { get; set; }
-        public DbSet<SubProcess> SubProcesses { get; set; }
+        public DbSet<Process> Processos { get; set; }
+        public DbSet<SubProcess> Subprocessos { get; set; }
+        public DbSet<Responsavel> Responsaveis { get; set; }
     }
 }
